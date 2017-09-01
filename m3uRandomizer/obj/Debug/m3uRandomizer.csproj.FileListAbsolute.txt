@@ -1,0 +1,8 @@
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\bin\Debug\m3uRandomizer.exe.config
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\bin\Debug\m3uRandomizer.exe
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\bin\Debug\m3uRandomizer.pdb
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\obj\Debug\m3uRandomizer.exe
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\obj\Debug\m3uRandomizer.pdb
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\bin\Debug\Entites.dll
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\bin\Debug\Entites.pdb
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\m3uRandomizer\obj\Debug\m3uRandomizer.csprojResolveAssemblyReference.cache

@@ -1,0 +1,5 @@
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\bin\Release\Entites.dll.config
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\bin\Release\Entites.dll
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\bin\Release\Entites.pdb
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\obj\Release\Entites.dll
+c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\obj\Release\Entites.pdb
