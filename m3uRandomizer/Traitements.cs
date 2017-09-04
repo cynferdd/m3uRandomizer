@@ -28,7 +28,7 @@ namespace m3uRandomizer
 
             string pathOrigine = "";
             string pathFinal = "";
-            if (args != null && args.Count() > 0 && File.Exists(args[0]) && Path.GetExtension(args[0]) == "m3u")
+            if (args != null && args.Count() > 0 && File.Exists(args[0]) && Path.GetExtension(args[0]) == ".m3u")
             {
                 pathOrigine = args[0];
                 try
@@ -69,7 +69,7 @@ namespace m3uRandomizer
             //  * on lit le contenu du fichier
             //  * on le transforme en liste de morceaux pour associer les #EXTINF au chemin de fichier associé
             //  * on randomize
-            List<Morceau> listeRandom = Randomizer(TransformerLignes(File.ReadAllLines(pathOrigine)));
+            List<Morceau> listeRandom = Randomizer(TransformerLignes(pathOrigine));
 
 
             // on commence par mettre l'entête obligatoire d'un fichier .m3u
@@ -88,11 +88,13 @@ namespace m3uRandomizer
         /// <summary>
         /// transformer la liste de lignes récupérées du fichier en liste de morceaux
         /// </summary>
-        /// <param name="lignes">lignes en provenance directe du fichier</param>
+        /// <param name="pathOrigine">chemin du fichier d'origine</param>
         /// <returns>liste de morceaux</returns>
-        private static List<Morceau> TransformerLignes(string[] lignes)
+        private static List<Morceau> TransformerLignes(string pathOrigine)
         {
+            string[] lignes = File.ReadAllLines(pathOrigine);
             List<Morceau> retour = new List<Morceau>();
+            List<string> listeChemins = new List<string>();
             Morceau morceauTemp = new Morceau();
             bool estMorceauAOublier = false;
             foreach (string ligne in lignes)
@@ -125,6 +127,12 @@ namespace m3uRandomizer
                             morceauTemp.Path = ligne;
                             retour.Add(morceauTemp);
                             morceauTemp = new Morceau();
+
+                            if (listeChemins == null || listeChemins.Count == 0 || 
+                                listeChemins.All(path => !path.Equals(Path.GetDirectoryName(ligne))))
+                            {
+                                listeChemins.Add(Path.GetDirectoryName(ligne));
+                            }
                         }
                         else
                         {
@@ -133,6 +141,7 @@ namespace m3uRandomizer
                     }
                 }
             }
+            File.AppendAllLines(Path.GetDirectoryName(pathOrigine) + "\\" + "_liste_chemins_" + DateTime.Now.ToShortDateString().Replace("/", "") + "_" + DateTime.Now.ToLongTimeString().Replace(":", "") + ".txt",listeChemins);
             return retour;
         }
 
