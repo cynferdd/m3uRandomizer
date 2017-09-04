@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace m3uRandomizer
 {
@@ -26,34 +27,80 @@ namespace m3uRandomizer
             Console.WriteLine("*---------------------------------------------------------*");
             Console.WriteLine("");
 
-            string pathOrigine = "";
             string pathFinal = "";
-            if (args != null && args.Count() > 0 && File.Exists(args[0]) && Path.GetExtension(args[0]) == ".m3u")
+            string pathOrigine = ObtenirCheminFichier(args);
+
+            if (!pathOrigine.Equals("") && File.Exists(pathOrigine))
             {
-                pathOrigine = args[0];
-                try
-                {
-                    pathFinal = RecreerM3u(pathOrigine);
-                }
-                catch (Exception e)
+                if (Path.GetExtension(pathOrigine) == ".m3u")
                 {
 
-                    Console.WriteLine("Erreur lors du traitement : " + e.Message);
+                    try
+                    {
+                        // le coeur du traitement
+                        pathFinal = RecreerM3u(pathOrigine);
+                    }
+                    catch (Exception e)
+                    {
+
+                        Console.WriteLine("Erreur lors du traitement : " + e.Message);
+                    }
+
+                    Console.WriteLine("Randomize effectué :");
+                    Console.WriteLine("origine : " + pathOrigine);
+                    Console.WriteLine("nouveau : " + pathFinal);
                 }
-                
-                Console.WriteLine("Randomize effectué :");
-                Console.WriteLine("origine : " + pathOrigine);
-                Console.WriteLine("nouveau : " + pathFinal);
+                else
+                {
+                    Console.WriteLine("mauvaise extension : " + Path.GetExtension(pathOrigine) + " - attendu : .m3u");
+                }
             }
             else
             {
-                Console.WriteLine("Aucun fichier .m3u existant fourni en paramètre.");
+                Console.WriteLine("chemin de fichier incorrect : " + pathOrigine);
             }
             Console.WriteLine("Appuyez sur une touche pour fermer.");
             Console.ReadKey();
         }
 
+
         #region méthodes utilitaires
+
+        /// <summary>
+        /// méthode d'obtention du chemin du fichier
+        /// </summary>
+        /// <param name="args">arguments passés en paramètres de l'application</param>
+        /// <returns>chemin du fichier à traiter</returns>
+        private static string ObtenirCheminFichier(string[] args)
+        {
+            string pathOrigine = "";
+            if (args != null && args.Count() > 0)
+            {
+                if (File.Exists(args[0]))
+                {
+                    pathOrigine = args[0];
+                }
+                else
+                {
+                    // si on ne trouve pas le fichier fourni en paramètre, on tente de se baser sur le répertoire en cours
+                    if (File.Exists(".//" + args[0]))
+                    {
+                        pathOrigine = ".//" + args[0];
+                    }
+                }
+            }
+            if (pathOrigine.Equals(""))
+            {
+                // si on a un chemin vide, on lance un prompt
+                OpenFileDialog fdlg = new OpenFileDialog();
+                if (fdlg.ShowDialog() == DialogResult.OK)
+                {
+                    // récupération du fichier
+                    pathOrigine = fdlg.FileName;
+                }
+            }
+            return pathOrigine;
+        }
 
         /// <summary>
         /// recréer un fichier .m3u
