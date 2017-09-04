@@ -101,7 +101,8 @@ namespace m3uRandomizer
             {
                 // #EXTM3U correspond à la première ligne d'une liste m3u étendue. On exclut.
                 // #EXTREM correspond à une ligne de commentaire, on exclut.
-                if (!ligne.Equals("#EXTM3U") && !ligne.Equals("#EXTREM"))
+                // #EXTVLCOPT correspond à une infos spécifique à vlc
+                if (!ligne.Equals("#EXTM3U") && !ligne.Equals("#EXTREM") && !ligne.Equals("#EXTVLCOPT"))
                 {
                     // #EXTINF correspond à une ligne d'infos de morceau
                     if (ligne.Contains("#EXTINF"))
