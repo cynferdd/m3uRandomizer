@@ -3,4 +3,3 @@ c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\bi
 c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\bin\Debug\Entites.pdb
 c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\obj\Debug\Entites.dll
 c:\users\mjolivet\documents\visual studio 2013\Projects\m3uRandomizer\Entites\obj\Debug\Entites.pdb
-C:\Users\mjolivet\Documents\Visual Studio 2013\Projects\m3uRandomizer\Entites\obj\Debug\Entites.csprojResolveAssemblyReference.cache
