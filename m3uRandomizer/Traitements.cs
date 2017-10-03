@@ -14,6 +14,8 @@ namespace m3uRandomizer
         private const int nbMinutesMax = 8;
         #endregion
 
+        private static List<string> ListeChemins = new List<string>();
+
         /// <summary>
         /// méthode principale d'execution
         /// </summary>
@@ -109,27 +111,42 @@ namespace m3uRandomizer
         /// <returns>chemin du nouveau fichier</returns>
         private static string RecreerM3u(string pathOrigine)
         {
-            List<string> contenu = new List<string>();
             string cheminFinal = PreparerCheminFinal(pathOrigine);
 
             // préparation de la liste aléatoire : 
             //  * on lit le contenu du fichier
             //  * on le transforme en liste de morceaux pour associer les #EXTINF au chemin de fichier associé
             //  * on randomize
-            List<Morceau> listeRandom = Randomizer(TransformerLignes(pathOrigine));
+            List<string> listeChemins;
+            List<Morceau> listeRandom = Randomizer(TransformerLignes(pathOrigine, out listeChemins));
 
+            List<string> contenu = CreationFichierM3u(cheminFinal, listeRandom);
+            DeplacerFichiers(listeChemins, contenu);
+            return cheminFinal;
+        }
 
+        
+
+        /// <summary>
+        /// méthode de création en tant que tel du fichier m3u
+        /// </summary>
+        /// <param name="cheminFinal">chemin du fichier</param>
+        /// <param name="listeMorceaux">liste de morceaux à intégrer</param>
+        private static List<string> CreationFichierM3u(string cheminFinal, List<Morceau> listeMorceaux)
+        {
+            List<string> contenu = new List<string>();
             // on commence par mettre l'entête obligatoire d'un fichier .m3u
             contenu.Add("#EXTM3U");
 
             // ajout des différentes lignes
-            foreach (Morceau item in listeRandom)
+            foreach (Morceau item in listeMorceaux)
             {
                 contenu.Add(item.Extinf);
                 contenu.Add(item.Path);
             }
             File.AppendAllLines(cheminFinal, contenu);
-            return cheminFinal;
+            Console.WriteLine("fichier créé : " + cheminFinal);
+            return contenu;
         }
 
         /// <summary>
@@ -137,11 +154,11 @@ namespace m3uRandomizer
         /// </summary>
         /// <param name="pathOrigine">chemin du fichier d'origine</param>
         /// <returns>liste de morceaux</returns>
-        private static List<Morceau> TransformerLignes(string pathOrigine)
+        private static List<Morceau> TransformerLignes(string pathOrigine, out List<string> ListeChemins)
         {
+            ListeChemins = new List<string>();
             string[] lignes = File.ReadAllLines(pathOrigine);
             List<Morceau> retour = new List<Morceau>();
-            List<string> listeChemins = new List<string>();
             Morceau morceauTemp = new Morceau();
             bool estMorceauAOublier = false;
             foreach (string ligne in lignes)
@@ -176,10 +193,10 @@ namespace m3uRandomizer
                             retour.Add(morceauTemp);
                             morceauTemp = new Morceau();
 
-                            if (listeChemins == null || listeChemins.Count == 0 || 
-                                listeChemins.All(path => !path.Equals(Path.GetDirectoryName(ligne))))
+                            if (ListeChemins.Count == 0 ||
+                                ListeChemins.All(path => !path.Equals(Path.GetDirectoryName(ligne))))
                             {
-                                listeChemins.Add(Path.GetDirectoryName(ligne));
+                                ListeChemins.Add(Path.GetDirectoryName(ligne));
                             }
                         }
                         else
@@ -189,7 +206,9 @@ namespace m3uRandomizer
                     }
                 }
             }
-            File.AppendAllLines(Path.GetDirectoryName(pathOrigine) + "\\" + "_liste_chemins_" + DateTime.Now.ToShortDateString().Replace("/", "") + "_" + DateTime.Now.ToLongTimeString().Replace(":", "") + ".txt",listeChemins);
+            string cheminListe = Path.GetDirectoryName(pathOrigine) + "\\" + "_liste_chemins_" + DateTime.Now.ToShortDateString().Replace("/", "") + "_" + DateTime.Now.ToLongTimeString().Replace(":", "") + ".txt";
+            File.AppendAllLines(cheminListe, ListeChemins);
+            Console.WriteLine("fichier créé : " + cheminListe);
             return retour;
         }
 
@@ -227,6 +246,66 @@ namespace m3uRandomizer
             string chemin = Path.GetDirectoryName(pathOrigine);
             cheminFinal = chemin + "\\" + fichierSansExtansion + "_random_" + DateTime.Now.ToShortDateString().Replace("/", "") + "_" + DateTime.Now.ToLongTimeString().Replace(":", "") + ".m3u";
             return cheminFinal;
+        }
+
+        /// <summary>
+        /// méthode finale de préparation de la liste
+        /// </summary>
+        /// <param name="listeChemins">liste des chemins rencontrés</param>
+        /// <param name="contenu">contenu de la liste m3u</param>
+        private static void DeplacerFichiers(List<string> listeChemins, List<string> contenu)
+        {
+            //Est ce que l'utilisateur veut copier les morceaux quelque part ailleurs ?
+            if (MessageBox.Show("Voulez-vous copier les fichiers ailleurs ?", "copie fichiers", MessageBoxButtons.YesNo) == DialogResult.Yes) { 
+                // recherche de l'endroit où tout copier
+                // si on a un chemin vide, on lance un prompt
+
+                FolderBrowserDialog fdlg = new FolderBrowserDialog();
+                if (fdlg.ShowDialog() == DialogResult.OK)
+                {
+                    // récupération du fichier
+                    string cheminCopie = fdlg.SelectedPath;
+                    
+                    // correspondances de chemins
+                    foreach (string chemin in listeChemins)
+                    {
+                        string nouveauChemin = cheminCopie + "\\" + chemin.Split('\\').LastOrDefault();
+                        List<string> nouveauContenu = new List<string>();
+                        foreach (string ligne in contenu)
+                        {
+                            // remplacement en bourrin des lignes par le nouveau chemin
+                            nouveauContenu.Add(ligne.Replace(chemin, nouveauChemin));
+                        }
+                        // écrasement du contenu pour avoir les nouveaux chemins
+                        contenu = nouveauContenu;
+
+
+                        // création des chemins si inexistants
+                        if (!Directory.Exists(nouveauChemin))
+                        {
+                            Directory.CreateDirectory(nouveauChemin);
+                        }
+                        try
+                        {
+                            // copie des fichiers
+                            foreach (string newPath in Directory.GetFiles(chemin, "*.*",
+                                SearchOption.AllDirectories))
+                                File.Copy(newPath, newPath.Replace(chemin, nouveauChemin), true);
+                        }
+                        catch (Exception e)
+                        {
+
+                            Console.WriteLine(e.Message);
+                        }
+                        
+                    }
+
+                    // création du m3u
+                    string cheminListe = cheminCopie + "\\liste_" + DateTime.Now.ToShortDateString().Replace("/", "") + "_" + DateTime.Now.ToLongTimeString().Replace(":", "") + "_copie.m3u";
+                    File.AppendAllLines(cheminListe , contenu);
+                    Console.WriteLine("fichier créé : " + cheminListe);
+                }
+            }
         }
         #endregion
     }
